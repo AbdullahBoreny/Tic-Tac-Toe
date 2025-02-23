@@ -4,7 +4,7 @@
 ** and we expose a dropToken method to be able to add Cells to squares
 */
 
-function Gameboard() {
+const gameBoard = (function(){
   const rows = 3;
   const columns = 3;
   const board = [];
@@ -24,22 +24,30 @@ function Gameboard() {
   const getBoard = () => board;
 
   const dropToken = (row,column, player) => {
-
-    
-    board[row][column].addToken(player);
-  };
-
+    if(checkEmptyCell(row,column)) {
+      board[row][column].addToken(player);
+    }
+ 
   
+};  
+const checkEmptyCell = (row,column)=> {
+  if(board[row][column].getValue()!==0) {
+   
+    return false;
+}
+return true;
+};
   
   const printBoard = () => {
     const boardWithCellValues = board.map((row) => row.map((cell) => cell.getValue()))
     console.log(boardWithCellValues);
   };
 
+
   // Here, we provide an interface for the rest of our
   // application to interact with the board
-  return { getBoard, dropToken, printBoard };
-}
+  return { checkEmptyCell,getBoard, dropToken, printBoard };
+})()
 
 
 
@@ -65,11 +73,11 @@ function Cell() {
 ** flow and state of the game's turns, as well as whether
 ** anybody has won the game
 */
-function GameController(
+const gameController = (function(
   playerOneName = "Player One",
   playerTwoName = "Player Two"
 ) {
-  const board = Gameboard();
+  
 
   const players = [
     {
@@ -81,33 +89,32 @@ function GameController(
       token: 'O'
     }
   ];
-
+ 
   let activePlayer = players[0];
 
   const switchPlayerTurn = () => {
+   
     activePlayer = activePlayer === players[0] ? players[1] : players[0];
   };
   const getActivePlayer = () => activePlayer;
 
   const printNewRound = () => {
-    board.printBoard();
-    console.log(`${getActivePlayer().name}'s turn.`);
+    gameBoard.printBoard();
+  
+   
   };
 
   const playRound = (row,column) => {
+  
     // Drop a token for the current player
     console.log(
       `Dropping ${getActivePlayer().name}'s token into column ${column} row ${row}...`
     );
-    board.dropToken(row,column, getActivePlayer().token);
-
-    /*  This is where we would check for a winner and handle that logic,
-        such as a win message. */
-
-    // Switch player turn
-    switchPlayerTurn();
-    printNewRound();
-   
+    if(gameBoard.checkEmptyCell(row,column)){
+      gameBoard.dropToken(row,column,getActivePlayer().token);
+      switchPlayerTurn();
+    }
+    
   };
 
   // Initial play game message
@@ -117,12 +124,22 @@ function GameController(
   // getActivePlayer for the UI version, so I'm revealing it now
   return {
     playRound,
-    getActivePlayer
+    getActivePlayer,
+    switchPlayerTurn,
+    printNewRound
   };
-}
+})();
 
-const game = GameController();
-game.playRound(1,1);
-game.playRound(1,1);
+
+gameController.playRound(1,1);
+gameController.printNewRound();
+gameController.playRound(1,1);
+gameController.playRound(1,1);
+gameController.playRound(0,1);
+gameController.playRound(1,2);
+gameController.playRound(0,0);
+gameController.playRound(1,0);
+gameController.printNewRound();
+
 
 
